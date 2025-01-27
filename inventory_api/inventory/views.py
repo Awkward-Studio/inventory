@@ -86,7 +86,7 @@ class ProductUpdateView(APIView):
     Handle PUT requests to update a product.
     """
 
-    def put(self, request, pk):
+    def patch(self, request, pk):
         try:
             product = Product.objects.get(pk=pk)
         except Product.DoesNotExist:
@@ -94,7 +94,7 @@ class ProductUpdateView(APIView):
                 {"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND
             )
 
-        serializer = ProductUpdateSerializer(product, data=request.data)
+        serializer = ProductUpdateSerializer(product, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
