@@ -5,6 +5,11 @@ from .views import (
     ProductDetailView,
     ProductUpdateView,
     ProductDeleteView,
+    ProductMediaListView,
+    ProductMediaByProductView,
+    CreateProductMediaView,
+    UpdateProductMediaView,
+    DeleteProductMediaView,
 )
 
 urlpatterns = [
@@ -16,5 +21,26 @@ urlpatterns = [
     ),
     path(
         "products/<uuid:pk>/delete/", ProductDeleteView.as_view(), name="product-delete"
+    ),
+    path("products/media/", ProductMediaListView.as_view(), name="all-product-media"),
+    path(
+        "products/<uuid:product_id>/media/",
+        ProductMediaByProductView.as_view(),
+        name="product-media",
+    ),
+    path(
+        "products/<uuid:product_id>/media/create/",
+        CreateProductMediaView.as_view(),
+        name="create-product-media",
+    ),
+    path(
+        "products/media/<uuid:media_id>/update/",
+        UpdateProductMediaView.as_view(),
+        name="update-product-media",
+    ),
+    path(
+        "products/media/<uuid:media_id>/delete/",
+        DeleteProductMediaView.as_view(),
+        name="delete-product-media",
     ),
 ]

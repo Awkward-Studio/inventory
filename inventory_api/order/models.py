@@ -9,6 +9,9 @@ class OrderCard(models.Model):
     customer_address = models.TextField()
     customer_phone = models.CharField(max_length=15)
     customer_gst = models.CharField(max_length=20, blank=True, null=True)
+    customer_chassis_or_engine_num = models.CharField(
+        max_length=100, blank=True, null=True
+    )
     status = models.CharField(
         max_length=50, default="Pending"
     )  # "Pending", "Finalized"

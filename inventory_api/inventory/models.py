@@ -3,6 +3,15 @@ import uuid
 
 
 class Product(models.Model):
+
+    MOBIS = "Mobis"
+    NON_MOBIS = "Non-Mobis"
+
+    MOBIS_CHOICES = [
+        (MOBIS, "Mobis"),
+        (NON_MOBIS, "Non-Mobis"),
+    ]
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=100)
     itemCode = models.CharField(max_length=50, null=True, blank=True)
@@ -29,8 +38,35 @@ class Product(models.Model):
     purchaseOrderId = models.CharField(max_length=50, blank=True, null=True)
     warrantyPeriod = models.CharField(max_length=50, blank=True, null=True)
     lastUpdatedDate = models.DateField(null=True, blank=True)
+
+    # Mobis or Non-Mobis Field
+    mobis_status = models.CharField(
+        max_length=10, choices=MOBIS_CHOICES, default=NON_MOBIS
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
+
+
+class ProductMedia(models.Model):
+    IMAGE = "image"
+    VIDEO = "video"
+
+    MEDIA_TYPE_CHOICES = [
+        (IMAGE, "Image"),
+        (VIDEO, "Video"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    product = models.ForeignKey(Product, related_name="media", on_delete=models.CASCADE)
+    media_type = models.CharField(max_length=10, choices=MEDIA_TYPE_CHOICES)
+    appwrite_file_id = models.CharField(
+        max_length=255, unique=True
+    )  # ID from Appwrite Storage
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.media_type} for {self.product.name}"

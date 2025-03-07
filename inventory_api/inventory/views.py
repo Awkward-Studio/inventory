@@ -2,13 +2,15 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
+from django.shortcuts import get_object_or_404
 
-from .models import Product
+from .models import Product, ProductMedia
 from .serializers import (
     ProductListSerializer,
     ProductCreateSerializer,
     ProductDetailSerializer,
     ProductUpdateSerializer,
+    ProductMediaSerializer,
 )
 
 from .filters import ProductFilter
@@ -117,4 +119,108 @@ class ProductDeleteView(APIView):
         except Product.DoesNotExist:
             return Response(
                 {"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+
+class ProductMediaListView(APIView):
+    """
+    Fetch all media for all products
+    """
+
+    def get(self, request):
+        try:
+            media = ProductMedia.objects.all().order_by("-created_at")
+            serializer = ProductMediaSerializer(media, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class ProductMediaByProductView(APIView):
+    """
+    Fetch all media associated with a specific product
+    """
+
+    def get(self, request, product_id):
+        try:
+            product = get_object_or_404(Product, id=product_id)
+            media = ProductMedia.objects.filter(product=product)
+            serializer = ProductMediaSerializer(media, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class CreateProductMediaView(APIView):
+    """
+    Create a new media entry for a product
+    """
+
+    def post(self, request, product_id):
+        try:
+            product = get_object_or_404(Product, id=product_id)
+            data = request.data.copy()
+            data["product"] = product.id  # Ensure product ID is assigned correctly
+
+            serializer = ProductMediaSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class UpdateProductMediaView(APIView):
+    """
+    Update an existing product media entry.
+    """
+
+    def patch(self, request, media_id):
+        """
+        Partial update for media (e.g., update only `appwrite_file_id` or `media_type`).
+        """
+        try:
+            media = get_object_or_404(ProductMedia, id=media_id)
+            serializer = ProductMediaSerializer(
+                media, data=request.data, partial=True
+            )  # Partial update
+
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class DeleteProductMediaView(APIView):
+    """
+    Delete a media entry by ID
+    """
+
+    def delete(self, request, media_id):
+        try:
+            media = get_object_or_404(ProductMedia, id=media_id)
+            media.delete()
+            return Response(
+                {"message": "Media deleted successfully"},
+                status=status.HTTP_204_NO_CONTENT,
+            )
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

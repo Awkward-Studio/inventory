@@ -37,6 +37,7 @@ class OrderCardCreateSerializer(serializers.ModelSerializer):
             "customer_address",
             "customer_phone",
             "customer_gst",
+            "customer_chassis_or_engine_num",
             "status",
         ]
 
@@ -56,5 +57,6 @@ class OrderCardDetailSerializer(serializers.ModelSerializer):
             "status",
             "order_parts",
             "progress_status",
+            "customer_chassis_or_engine_num",
             "created_at",
         ]
