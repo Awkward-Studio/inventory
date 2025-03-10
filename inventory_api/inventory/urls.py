@@ -8,6 +8,7 @@ from .views import (
     ProductMediaListView,
     ProductMediaByProductView,
     CreateProductMediaView,
+    GetProductMediaByIdView,
     UpdateProductMediaView,
     DeleteProductMediaView,
 )
@@ -42,5 +43,10 @@ urlpatterns = [
         "products/media/<uuid:media_id>/delete/",
         DeleteProductMediaView.as_view(),
         name="delete-product-media",
+    ),
+    path(
+        "products/media/<uuid:media_id>/",
+        GetProductMediaByIdView.as_view(),
+        name="get_product_media_by_id",
     ),
 ]

@@ -7,9 +7,13 @@ from .serializers import (
     OrderCardDetailSerializer,
     OrderPartSerializer,
     OrderCardCreateSerializer,
+    SendOTPSerializer,
+    VerifyOTPSerializer,
 )
 from django.db import IntegrityError
 from decimal import Decimal
+from django.core.mail import send_mail
+from django.shortcuts import get_object_or_404
 
 
 class OrderCardListView(APIView):
@@ -265,3 +269,70 @@ class FinalizeOrderView(APIView):
             {"message": "Order finalized and inventory updated."},
             status=status.HTTP_200_OK,
         )
+
+
+class SendOTPView(APIView):
+    """
+    Generates and sends an OTP to the customer's email.
+    """
+
+    def post(self, request):
+        serializer = SendOTPSerializer(data=request.data)
+        if serializer.is_valid():
+            order = get_object_or_404(
+                OrderCard, id=serializer.validated_data["order_id"]
+            )
+
+            # Clear old OTP and generate a new one
+            order.generate_otp_secret()
+            otp_code = order.generate_otp()
+
+            # Send OTP via email
+            send_mail(
+                subject="Order Verification OTP",
+                message=f"Your OTP for order #{order.order_number} is {otp_code}. It is valid for 10 minutes.",
+                from_email="no-reply@yourcompany.com",
+                recipient_list=[order.customer_email],
+            )
+
+            return Response(
+                {"message": "OTP sent to customer's email."}, status=status.HTTP_200_OK
+            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class VerifyOTPView(APIView):
+    """
+    Verifies the OTP entered by the customer and marks the order as completed.
+    """
+
+    def post(self, request):
+        serializer = VerifyOTPSerializer(data=request.data)
+        if serializer.is_valid():
+            order = get_object_or_404(
+                OrderCard, id=serializer.validated_data["order_id"]
+            )
+
+            # Check if OTP has expired
+            if order.is_otp_expired():
+                return Response(
+                    {"error": "OTP has expired. Please request a new OTP."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Verify OTP
+            if not order.verify_otp(serializer.validated_data["otp"]):
+                return Response(
+                    {"error": "Invalid OTP."}, status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Mark order as completed
+            order.mark_as_completed()
+
+            return Response(
+                {"message": "Order verified and marked as completed."},
+                status=status.HTTP_200_OK,
+            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

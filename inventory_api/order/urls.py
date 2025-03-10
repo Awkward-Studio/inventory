@@ -7,6 +7,8 @@ from .views import (
     OrderCardDeleteView,
     AddPartsToOrderView,
     FinalizeOrderView,
+    SendOTPView,
+    VerifyOTPView,
 )
 
 urlpatterns = [
@@ -33,4 +35,6 @@ urlpatterns = [
         FinalizeOrderView.as_view(),
         name="finalize-order",
     ),
+    path("orders/send-otp/", SendOTPView.as_view(), name="send-otp"),
+    path("orders/verify-otp/", VerifyOTPView.as_view(), name="verify-otp"),
 ]

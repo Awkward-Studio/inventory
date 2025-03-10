@@ -36,6 +36,7 @@ class OrderCardCreateSerializer(serializers.ModelSerializer):
             "customer_name",
             "customer_address",
             "customer_phone",
+            "customer_email",
             "customer_gst",
             "customer_chassis_or_engine_num",
             "status",
@@ -52,11 +53,26 @@ class OrderCardDetailSerializer(serializers.ModelSerializer):
             "order_number",
             "customer_name",
             "customer_address",
+            "customer_email",
             "customer_phone",
             "customer_gst",
             "status",
             "order_parts",
             "progress_status",
             "customer_chassis_or_engine_num",
+            "otp_generated_at",
             "created_at",
         ]
+
+
+class SendOTPSerializer(serializers.Serializer):
+    """Serializer for sending OTP to customer email."""
+
+    order_id = serializers.UUIDField()
+
+
+class VerifyOTPSerializer(serializers.Serializer):
+    """Serializer for verifying OTP and completing order."""
+
+    order_id = serializers.UUIDField()
+    otp = serializers.CharField(max_length=6)

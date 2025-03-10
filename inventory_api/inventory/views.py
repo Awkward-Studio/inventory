@@ -214,11 +214,34 @@ class DeleteProductMediaView(APIView):
     def delete(self, request, media_id):
         try:
             media = get_object_or_404(ProductMedia, id=media_id)
+            deleted_media_appwrite_id = str(
+                media.appwrite_file_id
+            )  # Store ID before deletion
             media.delete()
             return Response(
-                {"message": "Media deleted successfully"},
+                {
+                    "message": "Media deleted successfully",
+                    "appwrite_file_id": deleted_media_appwrite_id,
+                },
                 status=status.HTTP_204_NO_CONTENT,
             )
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class GetProductMediaByIdView(APIView):
+    """
+    Fetch a single product media entry by its ID
+    """
+
+    def get(self, request, media_id):
+        try:
+            media = get_object_or_404(ProductMedia, id=media_id)
+            serializer = ProductMediaSerializer(media)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
         except Exception as e:
             return Response(
