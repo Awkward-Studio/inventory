@@ -64,8 +64,10 @@ class ProductMedia(models.Model):
     product = models.ForeignKey(Product, related_name="media", on_delete=models.CASCADE)
     media_type = models.CharField(max_length=10, choices=MEDIA_TYPE_CHOICES)
     appwrite_file_id = models.CharField(
-        max_length=255, unique=True
+        max_length=255, blank=True, null=True
     )  # ID from Appwrite Storage
+    preview_url = models.CharField(max_length=255, blank=True, null=True)
+    thumbnail_url = models.CharField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
