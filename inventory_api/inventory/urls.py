@@ -11,6 +11,7 @@ from .views import (
     GetProductMediaByIdView,
     UpdateProductMediaView,
     DeleteProductMediaView,
+    ProductCsvUploadView,
 )
 
 urlpatterns = [
@@ -48,5 +49,10 @@ urlpatterns = [
         "products/media/<uuid:media_id>/",
         GetProductMediaByIdView.as_view(),
         name="get_product_media_by_id",
+    ),
+    path(
+        "products/upload-products-csv/",
+        ProductCsvUploadView.as_view(),
+        name="upload_products_csv",
     ),
 ]

@@ -3,6 +3,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from django.shortcuts import get_object_or_404
+import csv
+import io
+from datetime import datetime
 
 from .models import Product, ProductMedia
 from .serializers import (
@@ -247,3 +250,79 @@ class GetProductMediaByIdView(APIView):
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+class ProductCsvUploadView(APIView):
+    """
+    Handle CSV uploads to create products in the database.
+    """
+
+    def post(self, request):
+        csv_file = request.FILES.get("file")
+        if not csv_file:
+            return Response(
+                {"error": "No CSV file provided."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            decoded_file = csv_file.read().decode("utf-8")
+            io_string = io.StringIO(decoded_file)
+            reader = csv.DictReader(io_string)
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to read CSV file: {str(e)}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        created_products = []
+        errors = []
+        row_number = 1
+
+        for row in reader:
+            try:
+                product = Product(
+                    name=row.get("name"),
+                    itemCode=row.get("itemCode") or None,
+                    sku=row.get("sku") or None,
+                    hsn=row.get("hsn") or None,
+                    category=row.get("category") or None,
+                    quantity=int(row.get("quantity", 0)),
+                    itemLocation=row.get("itemLocation") or None,
+                    description=row.get("description") or None,
+                    price=row.get("price"),
+                    msp=row.get("msp") or None,
+                    mrp=row.get("mrp") or None,
+                    gst=row.get("gst") or None,
+                    cgst=row.get("cgst") or None,
+                    sgst=row.get("sgst") or None,
+                    igst=row.get("igst") or None,
+                    vendorCode=row.get("vendorCode") or None,
+                    vendorName=row.get("vendorName") or None,
+                    purchasePrice=row.get("purchasePrice") or None,
+                    purchaseLocation=row.get("purchaseLocation") or None,
+                    purchaseOrderId=row.get("purchaseOrderId") or None,
+                    warrantyPeriod=row.get("warrantyPeriod") or None,
+                    mobis_status=row.get("mobis_status", Product.NON_MOBIS),
+                )
+
+                # Parse dates if provided (expected format: YYYY-MM-DD)
+                if row.get("purchaseOrderDate"):
+                    product.purchaseOrderDate = datetime.strptime(
+                        row["purchaseOrderDate"], "%Y-%m-%d"
+                    ).date()
+                if row.get("lastUpdatedDate"):
+                    product.lastUpdatedDate = datetime.strptime(
+                        row["lastUpdatedDate"], "%Y-%m-%d"
+                    ).date()
+
+                product.save()
+                created_products.append(str(product.id))
+            except Exception as e:
+                errors.append(f"Row {row_number}: {str(e)}")
+            row_number += 1
+
+        return Response(
+            {"created_products": created_products, "errors": errors},
+            status=status.HTTP_200_OK,
+        )
