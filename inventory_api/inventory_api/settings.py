@@ -101,13 +101,15 @@ WSGI_APPLICATION = "inventory_api.wsgi.application"
 BASE_DIREC = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.path.join(BASE_DIR, "data", "db.sqlite3"),
-    }
-}
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": os.path.join(BASE_DIR, "data", "db.sqlite3"),
+#     }
+# }
+import dj_database_url
 
+DATABASES = {"default": dj_database_url.config(default=os.getenv("DATABASE_URL"))}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
