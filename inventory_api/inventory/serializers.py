@@ -9,7 +9,7 @@ class ProductMediaSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductMedia
-        fields = ["id", "product", "media_type", "appwrite_file_id", "created_at"]
+        fields = "__all__"
         read_only_fields = ["id", "created_at"]  # Prevent modification of these fields
 
 
