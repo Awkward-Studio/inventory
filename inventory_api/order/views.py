@@ -11,7 +11,6 @@ from .serializers import (
     VerifyOTPSerializer,
 )
 from django.db import IntegrityError
-from decimal import Decimal
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 
@@ -142,9 +141,6 @@ class AddPartsToOrderView(APIView):
         for part_data in parts:
             product_id = part_data.get("part_id")
             quantity = int(part_data.get("quantity", 1))
-            mrp = Decimal(part_data.get("mrp", 0))  # Editable per part
-            discount = int(part_data.get("discount", 0))  # Editable per part
-
             try:
                 product = Product.objects.get(id=product_id)
             except Product.DoesNotExist:
@@ -153,60 +149,13 @@ class AddPartsToOrderView(APIView):
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
-            # Fetch product details
-            gst = product.gst
-            cgst = product.cgst
-            sgst = product.sgst
-            part_name = product.name
-            part_number = product.sku
-            hsn = product.hsn
-
-            # If quantity is 0, delete the part if it exists
-            if quantity == 0:
-                try:
-                    order_part = OrderPart.objects.get(order=order, part_id=product_id)
-                    order_part.delete()
-                    deleted_parts.append(
-                        {"part_id": product_id, "message": "Part deleted"}
-                    )
-                except OrderPart.DoesNotExist:
-                    deleted_parts.append(
-                        {"part_id": product_id, "message": "Part not found"}
-                    )
-                continue
-
-            # Calculate totals
-            # Ensure all numerical values are of type Decimal
-            mrp_sub_total = Decimal(mrp) * Decimal(quantity)
-            discount_amount = Decimal(mrp_sub_total) * (
-                Decimal(discount) / Decimal(100)
-            )
-            sub_total = Decimal(mrp_sub_total) - Decimal(discount_amount)
-            cgst_amount = Decimal(sub_total) * (Decimal(cgst) / Decimal(100))
-            sgst_amount = Decimal(sub_total) * (Decimal(sgst) / Decimal(100))
-            total_tax_amount = Decimal(cgst_amount) + Decimal(sgst_amount)
-            total_amount = Decimal(sub_total) + Decimal(total_tax_amount)
-
             # Create or update the OrderPart
             order_part, created = OrderPart.objects.get_or_create(
                 order=order,
+                product=product,
                 part_id=product_id,
                 defaults={
                     "quantity": quantity,
-                    "mrp": mrp,
-                    "discount": discount,
-                    "discount_amount": discount_amount,
-                    "sub_total": sub_total,
-                    "gst": gst,
-                    "cgst": cgst,
-                    "sgst": sgst,
-                    "cgst_amount": cgst_amount,
-                    "sgst_amount": sgst_amount,
-                    "total_tax": total_tax_amount,
-                    "total_amount": total_amount,
-                    "part_name": part_name,
-                    "part_number": part_number,
-                    "hsn": hsn,
                 },
             )
 
@@ -214,10 +163,7 @@ class AddPartsToOrderView(APIView):
 
             if not created:
                 # If the part already exists, update the quantity and totals
-                order_part.quantity = quantity  # Update to the new quantity
-                order_part.mrp = mrp  # Update the MRP if it changed
-                order_part.discount = discount  # Update discount if provided
-                order_part.calculate_totals()
+                order_part.quantity = quantity
                 order_part.save()
                 code = status.HTTP_204_NO_CONTENT
 

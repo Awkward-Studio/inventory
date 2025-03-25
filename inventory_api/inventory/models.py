@@ -44,6 +44,9 @@ class Product(models.Model):
         max_length=10, choices=MOBIS_CHOICES, default=NON_MOBIS
     )
 
+    cover_image = models.CharField(max_length=255, blank=True, null=True)
+    cover_image_id = models.CharField(max_length=255, blank=True, null=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -64,6 +67,9 @@ class ProductMedia(models.Model):
     product = models.ForeignKey(Product, related_name="media", on_delete=models.CASCADE)
     media_type = models.CharField(max_length=10, choices=MEDIA_TYPE_CHOICES)
     appwrite_file_id = models.CharField(
+        max_length=255, blank=True, null=True
+    )  # ID from Appwrite Storage
+    appwrite_thumbnail_file_id = models.CharField(
         max_length=255, blank=True, null=True
     )  # ID from Appwrite Storage
     preview_url = models.CharField(max_length=255, blank=True, null=True)
