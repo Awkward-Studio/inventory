@@ -46,6 +46,7 @@ class ProductListSerializer(serializers.ModelSerializer):
             "warrantyPeriod",
             "mobis_status",
             "cover_image",
+            "cover_image_id",
             "created_at",
             "updated_at",
         ]
@@ -83,6 +84,7 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             "warrantyPeriod",
             "mobis_status",
             "cover_image",
+            "cover_image_id",
             "created_at",
             "updated_at",
         ]
@@ -132,6 +134,7 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
             "warrantyPeriod",
             "mobis_status",
             "cover_image",
+            "cover_image_id",
             "created_at",
             "updated_at",
         ]

@@ -45,6 +45,7 @@ class Product(models.Model):
     )
 
     cover_image = models.CharField(max_length=255, blank=True, null=True)
+    cover_image_id = models.CharField(max_length=255, blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
