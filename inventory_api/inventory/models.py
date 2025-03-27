@@ -16,7 +16,7 @@ class Product(models.Model):
     name = models.CharField(max_length=100)
     itemCode = models.CharField(max_length=50, null=True, blank=True)
     sku = models.CharField(max_length=50, unique=True, null=True, blank=True)
-    hsn = models.CharField(max_length=50, unique=True, null=True, blank=True)
+    hsn = models.CharField(max_length=50, null=True, blank=True)
     category = models.CharField(max_length=50, blank=True, null=True)
     quantity = models.PositiveIntegerField(default=0)
     itemLocation = models.CharField(max_length=500, blank=True, null=True)
@@ -44,6 +44,9 @@ class Product(models.Model):
         max_length=10, choices=MOBIS_CHOICES, default=NON_MOBIS
     )
 
+    cover_image = models.CharField(max_length=255, blank=True, null=True)
+    cover_image_id = models.CharField(max_length=255, blank=True, null=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -64,6 +67,9 @@ class ProductMedia(models.Model):
     product = models.ForeignKey(Product, related_name="media", on_delete=models.CASCADE)
     media_type = models.CharField(max_length=10, choices=MEDIA_TYPE_CHOICES)
     appwrite_file_id = models.CharField(
+        max_length=255, blank=True, null=True
+    )  # ID from Appwrite Storage
+    appwrite_thumbnail_file_id = models.CharField(
         max_length=255, blank=True, null=True
     )  # ID from Appwrite Storage
     preview_url = models.CharField(max_length=255, blank=True, null=True)

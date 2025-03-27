@@ -1,29 +1,19 @@
 from rest_framework import serializers
 from .models import OrderCard, OrderPart
+from inventory.serializers import ProductListSerializer
 
 
 class OrderPartSerializer(serializers.ModelSerializer):
+    product = ProductListSerializer(read_only=True)
+
     class Meta:
         model = OrderPart
         fields = [
             "id",
             "order",
             "part_id",
-            "part_name",
-            "part_number",
-            "hsn",
             "quantity",
-            "mrp",
-            "discount",
-            "discount_amount",
-            "sub_total",
-            "gst",
-            "cgst",
-            "sgst",
-            "cgst_amount",
-            "sgst_amount",
-            "total_tax",
-            "total_amount",
+            "product",
             "created_at",
         ]
 
@@ -40,6 +30,12 @@ class OrderCardCreateSerializer(serializers.ModelSerializer):
             "customer_gst",
             "customer_chassis_or_engine_num",
             "status",
+            "discount_amount",
+            "sub_total",
+            "cgst_amount",
+            "sgst_amount",
+            "total_tax",
+            "total_amount",
         ]
 
 
@@ -62,6 +58,12 @@ class OrderCardDetailSerializer(serializers.ModelSerializer):
             "customer_chassis_or_engine_num",
             "otp_generated_at",
             "created_at",
+            "discount_amount",
+            "sub_total",
+            "cgst_amount",
+            "sgst_amount",
+            "total_tax",
+            "total_amount",
         ]
 
 
