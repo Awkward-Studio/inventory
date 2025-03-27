@@ -291,7 +291,7 @@ class SendOTPView(APIView):
             send_mail(
                 subject="Order Verification OTP",
                 message=f"Your OTP for order #{order.order_number} is {otp_code}. It is valid for 10 minutes.",
-                from_email="atiqaxis7@gmail.com",
+                from_email="tech@awkwardstudio.in",
                 recipient_list=[order.customer_email],
             )
 
