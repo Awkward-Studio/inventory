@@ -2,7 +2,7 @@ from django.db import models, transaction
 import pyotp
 import uuid
 from django.utils.timezone import now
-
+from datetime import timedelta
 from inventory.models import Product
 
 
@@ -83,7 +83,7 @@ class OrderCard(models.Model):
     def is_otp_expired(self):
         """Checks if the OTP is expired (valid for 10 minutes)."""
         if self.otp_generated_at:
-            expiration_time = self.otp_generated_at + pyotp.utils.timedelta(seconds=600)
+            expiration_time = self.otp_generated_at + timedelta(seconds=600)
             return now() > expiration_time
         return True
 
