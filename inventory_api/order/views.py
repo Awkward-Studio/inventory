@@ -255,6 +255,7 @@ class VerifyOTPView(APIView):
 
     def post(self, request):
         serializer = VerifyOTPSerializer(data=request.data)
+        isVerified = True
         if serializer.is_valid():
             order = get_object_or_404(
                 OrderCard, id=serializer.validated_data["order_id"]
@@ -262,22 +263,31 @@ class VerifyOTPView(APIView):
 
             # Check if OTP has expired
             if order.is_otp_expired():
+                isVerified = False
                 return Response(
-                    {"error": "OTP has expired. Please request a new OTP."},
+                    {
+                        "isVerified": isVerified,
+                        "error": "OTP has expired. Please request a new OTP.",
+                    },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
             # Verify OTP
             if not order.verify_otp(serializer.validated_data["otp"]):
+                isVerified = False
                 return Response(
-                    {"error": "Invalid OTP."}, status=status.HTTP_400_BAD_REQUEST
+                    {"isVerified": isVerified, "error": "Invalid OTP."},
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
 
             # Mark order as completed
             order.mark_as_completed()
 
             return Response(
-                {"message": "Order verified and marked as completed."},
+                {
+                    "isVerified": isVerified,
+                    "message": "Order verified and marked as completed.",
+                },
                 status=status.HTTP_200_OK,
             )
 
