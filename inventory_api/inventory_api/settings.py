@@ -27,7 +27,11 @@ SECRET_KEY = "django-insecure-xq06m4#wnz3so71a4l@=ida2wg@yd$a@6l(84165m5^t71%m)a
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["inventory-fn4c.onrender.com"]
+ALLOWED_HOSTS = [
+    "inventory-fn4c.onrender.com",
+    "localhost",
+    "127.0.0.1",
+]
 
 
 # Application definition
@@ -65,6 +69,7 @@ SIMPLE_JWT = {
 
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -73,7 +78,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
 ]
 
 # Enable WhiteNoise compression & caching
@@ -176,8 +180,10 @@ CORS_ALLOW_METHODS = [
     "OPTIONS",
 ]
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://inventory-fn4c.onrender.com",  # ✅ Your Render domain
+CSRF_TRUSTED_ORIGINS =  [
+    "https://inventory-fn4c.onrender.com",
+    "http://localhost:3000",  # ✅ Your Render domain
+    "http://localhost:8000",  # ✅ Your Render domain
 ]
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
