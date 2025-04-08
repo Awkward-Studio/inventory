@@ -28,7 +28,7 @@ SECRET_KEY = "django-insecure-xq06m4#wnz3so71a4l@=ida2wg@yd$a@6l(84165m5^t71%m)a
 DEBUG = True
 
 ALLOWED_HOSTS = [
-   "localhost", "127.0.0.1", "https://inventory-production-0026.up.railway.app",
+   "localhost", "127.0.0.1", "inventory-production-0026.up.railway.app",
 ]
 
 
