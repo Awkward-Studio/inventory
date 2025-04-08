@@ -27,7 +27,7 @@ SECRET_KEY = "django-insecure-xq06m4#wnz3so71a4l@=ida2wg@yd$a@6l(84165m5^t71%m)a
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["inventory-fn4c.onrender.com"]
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -65,6 +65,7 @@ SIMPLE_JWT = {
 
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -73,11 +74,11 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
 ]
 
 # Enable WhiteNoise compression & caching
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STATICSTORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 ROOT_URLCONF = "inventory_api.urls"
 
@@ -106,15 +107,15 @@ WSGI_APPLICATION = "inventory_api.wsgi.application"
 BASE_DIREC = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": os.path.join(BASE_DIR, "data", "db.sqlite3"),
-#     }
-# }
-import dj_database_url
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
+}
+# import dj_database_url
 
-DATABASES = {"default": dj_database_url.config(default=os.getenv("DATABASE_URL"))}
+# DATABASES = {"default": dj_database_url.config(default=os.getenv("DATABASE_URL"))}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -176,6 +177,12 @@ CORS_ALLOW_METHODS = [
     "OPTIONS",
 ]
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://inventory-fn4c.onrender.com",  # ✅ Your Render domain
-]
+CSRF_TRUSTED_ORIGINS = [""]
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+EMAIL_HOST_USER = "tech@awkwardstudio.in"  # your Gmail address
+EMAIL_HOST_PASSWORD = "zdnv bgmp pqmk sxad"
