@@ -118,6 +118,7 @@ BASE_DIREC = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 import dj_database_url
 
 DATABASES = {"default": dj_database_url.config(default=os.getenv("DATABASE_URL"))}
+#yamabiko.proxy.rlwy.net:21936 #Railway.app postgres instance. test whenever
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
