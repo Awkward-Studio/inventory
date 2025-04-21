@@ -28,7 +28,9 @@ SECRET_KEY = "django-insecure-xq06m4#wnz3so71a4l@=ida2wg@yd$a@6l(84165m5^t71%m)a
 DEBUG = True
 
 ALLOWED_HOSTS = [
-   "localhost", "127.0.0.1", "inventory-production-0026.up.railway.app",
+    "localhost",
+    "127.0.0.1",
+    "inventory-production-0026.up.railway.app",
 ]
 
 
@@ -47,6 +49,7 @@ INSTALLED_APPS = [
     "inventory",
     "order",
     "invoices",
+    "staff",
     "django_filters",
     "corsheaders",
 ]
@@ -80,7 +83,7 @@ MIDDLEWARE = [
 
 # Enable WhiteNoise compression & caching
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-STATICSTORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICSTORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 ROOT_URLCONF = "inventory_api.urls"
 
@@ -179,7 +182,7 @@ CORS_ALLOW_METHODS = [
     "OPTIONS",
 ]
 
-CSRF_TRUSTED_ORIGINS =  ["https://inventory-production-0026.up.railway.app"]
+CSRF_TRUSTED_ORIGINS = ["https://inventory-production-0026.up.railway.app"]
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"

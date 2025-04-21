@@ -34,6 +34,8 @@ class OrderCardCreateSerializer(serializers.ModelSerializer):
             "sub_total",
             "cgst_amount",
             "sgst_amount",
+            "team_lead",
+            "sales_executive",
             "total_tax",
             "total_amount",
         ]
@@ -62,6 +64,8 @@ class OrderCardDetailSerializer(serializers.ModelSerializer):
             "sub_total",
             "cgst_amount",
             "sgst_amount",
+            "team_lead",
+            "sales_executive",
             "total_tax",
             "total_amount",
         ]

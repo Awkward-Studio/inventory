@@ -4,6 +4,7 @@ import uuid
 from django.utils.timezone import now
 from datetime import timedelta
 from inventory.models import Product
+from staff.models import Staff
 
 
 class OrderCard(models.Model):
@@ -46,6 +47,21 @@ class OrderCard(models.Model):
     otp_generated_at = models.DateTimeField(
         blank=True, null=True
     )  # Timestamp when OTP was created
+
+    team_lead = models.ForeignKey(
+        Staff,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="orders_as_team_lead",
+    )
+    sales_executive = models.ForeignKey(
+        Staff,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="orders_as_sales_executive",
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
