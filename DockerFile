@@ -1,0 +1,21 @@
+FROM python:3.9.13
+
+WORKDIR /usr/src/app
+
+# system deps for postgres client
+RUN apt-get update \
+ && apt-get install -y libpq-dev gcc \
+ && rm -rf /var/lib/apt/lists/*
+
+# install Python deps
+COPY inventory_api/requirements.txt ./
+RUN pip3 install --upgrade pip \
+ && pip3 install -r requirements.txt
+
+# copy code
+COPY inventory_api ./
+
+EXPOSE 8000
+
+# note: superuser credentials come from env via docker-compose
+CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py createsuperuser --noinput --username $DJANGO_SUPERUSER_USERNAME --email $DJANGO_SUPERUSER_EMAIL && gunicorn -w $NUM_WORKERS -b 0.0.0.0:8000 inventory_api.wsgi"]

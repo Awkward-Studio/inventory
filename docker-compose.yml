@@ -1,0 +1,23 @@
+# docker-compose.yml
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - ./inventory_api:/usr/src/app
+    ports:
+      - "8000:8000"
+    command: >
+      sh -c "
+        python manage.py migrate --noinput &&
+        python manage.py createsuperuser --noinput \
+          --username \$DJANGO_SUPERUSER_USERNAME \
+          --email \$DJANGO_SUPERUSER_EMAIL &&
+        gunicorn -w \$NUM_WORKERS -b 0.0.0.0:8000 inventory_api.wsgi
+      "
+    restart: unless-stopped
