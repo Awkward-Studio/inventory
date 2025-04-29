@@ -7,27 +7,31 @@ jobs:
   deploy:
     machine: true
     steps:
-      # 1. Configure AWS CLI
+      # 1. AWS CLI (uses AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION)
       - aws-cli/setup
 
-      # 2. Fetch the current public IP for our instance
+        # 2. Fetch the current public IP for our instance
       - run:
           name: Get EC2 public IP
           command: |
+            # ensure AWS CLI is pointed at the right region
             aws configure set region $AWS_DEFAULT_REGION
+
+            # explicitly pass --region when describing instances
             IP=$(aws ec2 describe-instances \
               --region $AWS_DEFAULT_REGION \
               --instance-ids $EC2_INSTANCE_ID \
               --query 'Reservations[0].Instances[0].PublicIpAddress' \
               --output text)
+
             echo "export EC2_HOST=$IP" >> $BASH_ENV
 
-      # 3. Load our SSH key into the agent
+      # 3. Load the deploy key
       - add_ssh_keys:
           fingerprints:
             - "SHA256:u6+po0YEbQhrHo1j40ptyNmFrngk8M0GFGncnU5vyCE"
 
-      # 4. Generate the .env file from secure CircleCI vars
+      # 4. Generate .env in CI from secure vars
       - run:
           name: Generate .env file
           command: |
@@ -40,6 +44,7 @@ jobs:
             echo "DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}">> .env
             echo "NUM_WORKERS=${NUM_WORKERS:-1}"                         >> .env
 
+      # 5. Ensure home directory structure (optional)
       - run:
           name: Ensure ~/app exists on EC2
           command: |
@@ -47,53 +52,52 @@ jobs:
                 $EC2_USER@$EC2_HOST \
               "mkdir -p ~/app"
 
-      # 5. Upload .env to the EC2
+      # 6. Clone or update your repo on EC2
+      - run:
+          name: Clone or update code on EC2
+          command: |
+            ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST "\
+              set -e; \
+              if ! command -v git >/dev/null; then sudo yum install -y git; fi; \
+              if [ ! -d ~/app/.git ]; then \
+                rm -rf ~/app; \
+                git clone --depth 1 https://github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git ~/app; \
+              else \
+                cd ~/app; \
+                git fetch origin $CIRCLE_BRANCH; \
+                git reset --hard origin/$CIRCLE_BRANCH; \
+              fi\
+            "
+
+      # 7. Upload the .env to the right place
       - run:
           name: Upload .env to EC2
           command: |
             scp -o StrictHostKeyChecking=no .env \
               $EC2_USER@$EC2_HOST:~/app/.env
-            if [ $? -ne 0 ]; then
-              echo "Error: SSH key not found or permission denied."
-              exit 1
-            fi
 
-      # 6. SSH & deploy—install Docker & Compose only if needed, then deploy
+      # 8. Bootstrap Docker & Compose, then deploy
       - run:
           name: Bootstrap & Deploy on EC2
           command: |
-            ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST "
-              set -e
-
-              # 1) Install Docker if missing
-              if ! command -v docker >/dev/null; then
-                sudo yum update -y
-                sudo amazon-linux-extras install docker -y
-                sudo systemctl enable docker
-              fi
-
-              # 2) Start Docker daemon
-              sudo systemctl start docker
-
-              # 3) Install docker-compose v2 if missing
-              if ! command -v docker-compose >/dev/null; then
+            ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST "\
+              set -e; \
+              # Install Docker if needed\
+              if ! command -v docker >/dev/null; then \
+                sudo yum update -y; \
+                sudo amazon-linux-extras install docker -y; \
+                sudo systemctl enable docker; \
+              fi; \
+              sudo systemctl start docker; \
+              # Install docker-compose v2 binary if missing\
+              if ! command -v docker-compose >/dev/null; then \
                 sudo curl -SL https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-linux-x86_64 \
-                  -o /usr/local/bin/docker-compose
-                sudo chmod +x /usr/local/bin/docker-compose
-              fi
-
-              # 4) Deploy your app
-              cd ~/app
-              if [ -d .git ]; then
-                git fetch origin
-                git reset --hard origin/main
-              else
-                git init
-                git remote add origin <YOUR_REPO_URL>
-                git fetch origin
-                git reset --hard origin/main
-              fi
-              docker-compose up -d --build --remove-orphans
+                  -o /usr/local/bin/docker-compose; \
+                sudo chmod +x /usr/local/bin/docker-compose; \
+              fi; \
+              # Deploy\
+              cd ~/app; \
+              docker-compose up -d --build --remove-orphans\
             "
 
 workflows:
