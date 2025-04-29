@@ -16,6 +16,7 @@ jobs:
           command: |
             aws configure set region $AWS_DEFAULT_REGION
             IP=$(aws ec2 describe-instances \
+              --region $AWS_DEFAULT_REGION \
               --instance-ids $EC2_INSTANCE_ID \
               --query 'Reservations[0].Instances[0].PublicIpAddress' \
               --output text)
@@ -34,9 +35,9 @@ jobs:
             echo "DJANGO_DEBUG=${DJANGO_DEBUG:-False}"                   >> .env
             echo "DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}"          >> .env
             echo "DATABASE_URL=${DATABASE_URL}"                          >> .env
-            echo "DJANGO_SUPERUSER_USERNAME=${DJANGO_SUPERUSER_USERNAME}">> .env
+            echo "DJANGO_SUPERUSER_USERNAME=${DJANGO_SUPERUSER_USERNAME}" >> .env
             echo "DJANGO_SUPERUSER_EMAIL=${DJANGO_SUPERUSER_EMAIL}"      >> .env
-            echo "DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}">> .env
+            echo "DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}" >> .env
             echo "NUM_WORKERS=${NUM_WORKERS:-1}"                         >> .env
 
       # 5. Upload .env to the EC2
