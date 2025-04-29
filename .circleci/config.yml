@@ -46,10 +46,6 @@ jobs:
           command: |
             scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no .env \
               $EC2_USER@$EC2_HOST:~/app/.env
-            if [ ! -f ~/.ssh/id_rsa ]; then
-              echo "SSH key not found. Please ensure the key is added in CircleCI and accessible."
-              exit 1
-            fi
 
       # 6. SSH & deploy—single quoted command, no heredoc
       - run:
