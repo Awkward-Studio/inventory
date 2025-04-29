@@ -10,15 +10,20 @@ jobs:
       # 1. AWS CLI (uses AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION)
       - aws-cli/setup
 
-      # 2. Get the EC2 public IP
+        # 2. Fetch the current public IP for our instance
       - run:
           name: Get EC2 public IP
           command: |
+            # ensure AWS CLI is pointed at the right region
             aws configure set region $AWS_DEFAULT_REGION
+
+            # explicitly pass --region when describing instances
             IP=$(aws ec2 describe-instances \
+              --region $AWS_DEFAULT_REGION \
               --instance-ids $EC2_INSTANCE_ID \
               --query 'Reservations[0].Instances[0].PublicIpAddress' \
               --output text)
+
             echo "export EC2_HOST=$IP" >> $BASH_ENV
 
       # 3. Load the deploy key
