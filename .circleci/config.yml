@@ -40,15 +40,23 @@ jobs:
             echo "DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}">> .env
             echo "NUM_WORKERS=${NUM_WORKERS:-1}"                         >> .env
 
+      - run:
+          name: Ensure ~/app exists on EC2
+          command: |
+            ssh -o StrictHostKeyChecking=no \
+                $EC2_USER@$EC2_HOST \
+              "mkdir -p ~/app"
+
       # 5. Upload .env to the EC2
       - run:
           name: Upload .env to EC2
           command: |
-            scp -i /home/circleci/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no .env \
-              $EC2_USER@$EC2_HOST:~/app/.env || {
-              echo "Error: SSH key not found or permission denied.";
-              exit 1;
-            }
+            scp -o StrictHostKeyChecking=no .env \
+              $EC2_USER@$EC2_HOST:~/app/.env
+            if [ $? -ne 0 ]; then
+              echo "Error: SSH key not found or permission denied."
+              exit 1
+            fi
 
       # 6. SSH & deploy—single quoted command, no heredoc
       - run:
@@ -56,6 +64,7 @@ jobs:
           command: |
             ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST "\
               sudo yum update -y && \
+              sudo yum install -y amazon-linux-extras && \
               sudo amazon-linux-extras install docker -y && \
               sudo yum install -y docker-compose-plugin && \
               sudo service docker start && \
