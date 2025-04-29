@@ -11,21 +11,24 @@ services:
     # ─────────────────────────────────────────────────────────────────────────
     ports:
       - "8000:8000"
-    command: |
-      set -e
+    command: >
+      sh -c "
+        set -e
 
-      # 1) Run migrations
-      python manage.py migrate --noinput
+        # 1) Run migrations
+        python manage.py migrate --noinput
 
-      # 2) Only create superuser if it doesn't already exist
-      if ! python manage.py shell -c 'import os,sys; \
-      from django.contrib.auth import get_user_model; \
-      sys.exit(0 if get_user_model().objects.filter(username=os.environ.get("DJANGO_SUPERUSER_USERNAME")).exists() else 1)'; then
-        python manage.py createsuperuser --noinput \
-          --username "$DJANGO_SUPERUSER_USERNAME" \
-          --email    "$DJANGO_SUPERUSER_EMAIL"
-      fi
+        # 2) Create superuser only if missing
+        if ! python manage.py shell -c '\
+          import os,sys;\
+          from django.contrib.auth import get_user_model;\
+          sys.exit(0 if get_user_model().objects.filter(username=os.environ.get(\"DJANGO_SUPERUSER_USERNAME\")).exists() else 1)'; then
+          python manage.py createsuperuser --noinput \
+            --username \"$DJANGO_SUPERUSER_USERNAME\" \
+            --email    \"$DJANGO_SUPERUSER_EMAIL\"
+        fi
 
-      # 3) Finally start Gunicorn
-      exec gunicorn -w "$NUM_WORKERS" -b 0.0.0.0:8000 inventory_api.wsgi
+        # 3) Launch Gunicorn
+        exec gunicorn -w \"$NUM_WORKERS\" -b 0.0.0.0:8000 inventory_api.wsgi
+      "
     restart: unless-stopped
