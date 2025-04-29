@@ -5,30 +5,22 @@ services:
       dockerfile: Dockerfile
     env_file:
       - .env
-    # ── uncomment in dev only ───────────────────────────────────────────────
-    # volumes:
-    #   - ./inventory_api:/usr/src/app
-    # ─────────────────────────────────────────────────────────────────────────
     ports:
       - "8000:8000"
     command: >
       sh -c "
-        set -e
+        set -e &&
 
-        # 1) Run migrations
-        python manage.py migrate --noinput
+        # 1) Migrate
+        python manage.py migrate --noinput &&
 
-        # 2) Create superuser only if missing
-        if ! python manage.py shell -c '\
-          import os,sys;\
-          from django.contrib.auth import get_user_model;\
-          sys.exit(0 if get_user_model().objects.filter(username=os.environ.get(\"DJANGO_SUPERUSER_USERNAME\")).exists() else 1)'; then
+        # 2) Create superuser if missing (one-liner, no newlines)
+        if ! python manage.py shell -c \"import os,sys;from django.contrib.auth import get_user_model;sys.exit(0 if get_user_model().objects.filter(username=os.environ.get('DJANGO_SUPERUSER_USERNAME')).exists() else 1)\"; then
           python manage.py createsuperuser --noinput \
             --username \"$DJANGO_SUPERUSER_USERNAME\" \
             --email    \"$DJANGO_SUPERUSER_EMAIL\"
-        fi
+        fi &&
 
         # 3) Launch Gunicorn
         exec gunicorn -w \"$NUM_WORKERS\" -b 0.0.0.0:8000 inventory_api.wsgi
       "
-    restart: unless-stopped
