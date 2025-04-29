@@ -55,8 +55,14 @@ jobs:
       - run:
           name: Upload app to EC2
           command: |
+            # ensure the remote dir exists
             ssh -o StrictHostKeyChecking=no "$EC2_USER@$EC2_HOST" "mkdir -p ~/app"
-            scp -r -o StrictHostKeyChecking=no . "$EC2_USER@$EC2_HOST:~/app"
+
+            # enable copying dot‐files too
+            shopt -s dotglob
+
+            # copy everything in the repo (code + .env + compose + Dockerfile + inventory_api/, etc.)
+            scp -r -o StrictHostKeyChecking=no * "$EC2_USER@$EC2_HOST:~/app"
 
       # 7. Upload the .env to the right place
       - run:
