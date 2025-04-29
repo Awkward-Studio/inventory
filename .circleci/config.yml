@@ -44,7 +44,7 @@ jobs:
       - run:
           name: Upload .env to EC2
           command: |
-            scp -i /home/circleci/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no .env \
+            scp -o StrictHostKeyChecking=no .env \
               $EC2_USER@$EC2_HOST:~/app/.env
             if [ $? -ne 0 ]; then
               echo "Error: SSH key not found or permission denied."
