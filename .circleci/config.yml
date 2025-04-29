@@ -8,6 +8,7 @@ jobs:
     machine: true
     steps:
       # 1. AWS CLI (uses AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION)
+      - checkout
       - aws-cli/setup
 
         # 2. Fetch the current public IP for our instance
