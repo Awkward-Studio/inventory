@@ -44,7 +44,7 @@ jobs:
       - run:
           name: Upload .env to EC2
           command: |
-            scp -o StrictHostKeyChecking=no .env \
+            scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no .env \
               $EC2_USER@$EC2_HOST:~/app/.env
 
       # 6. SSH & deploy—single quoted command, no heredoc
