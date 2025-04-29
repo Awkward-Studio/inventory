@@ -14,6 +14,7 @@ jobs:
       - run:
           name: Get EC2 public IP
           command: |
+            aws configure set region $AWS_DEFAULT_REGION
             IP=$(aws ec2 describe-instances \
               --instance-ids $EC2_INSTANCE_ID \
               --query 'Reservations[0].Instances[0].PublicIpAddress' \
