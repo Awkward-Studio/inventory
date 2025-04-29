@@ -46,6 +46,10 @@ jobs:
           command: |
             scp -i ~/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no .env \
               $EC2_USER@$EC2_HOST:~/app/.env
+            if [ $? -ne 0 ]; then
+              echo "Error: SSH key not found or permission denied."
+              exit 1
+            fi
 
       # 6. SSH & deploy—single quoted command, no heredoc
       - run:
