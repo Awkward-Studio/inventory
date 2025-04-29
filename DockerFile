@@ -17,5 +17,11 @@ COPY inventory_api ./
 
 EXPOSE 8000
 
-# note: superuser credentials come from env via docker-compose
-CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py createsuperuser --noinput --username $DJANGO_SUPERUSER_USERNAME --email $DJANGO_SUPERUSER_EMAIL && gunicorn -w $NUM_WORKERS -b 0.0.0.0:8000 inventory_api.wsgi"]
+# migrate → create superuser if missing → start gunicorn
+CMD python manage.py migrate --noinput && \
+    if ! python manage.py shell -c "import os,sys; from django.contrib.auth import get_user_model; sys.exit(0 if get_user_model().objects.filter(username=os.environ.get('DJANGO_SUPERUSER_USERNAME')).exists() else 1)"; then \
+        python manage.py createsuperuser --noinput \
+          --username \"$DJANGO_SUPERUSER_USERNAME\" \
+          --email    \"$DJANGO_SUPERUSER_EMAIL\"; \
+    fi && \
+    exec gunicorn -w \"$NUM_WORKERS\" -b 0.0.0.0:8000 inventory_api.wsgi
