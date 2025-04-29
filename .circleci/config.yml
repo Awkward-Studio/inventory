@@ -64,6 +64,7 @@ jobs:
           command: |
             ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST "\
               sudo yum update -y && \
+              sudo yum install -y amazon-linux-extras && \
               sudo amazon-linux-extras install docker -y && \
               sudo yum install -y docker-compose-plugin && \
               sudo service docker start && \
