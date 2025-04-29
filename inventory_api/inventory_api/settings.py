@@ -27,12 +27,7 @@ SECRET_KEY = "django-insecure-xq06m4#wnz3so71a4l@=ida2wg@yd$a@6l(84165m5^t71%m)a
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1",
-    "inventory-production-0026.up.railway.app",
-]
-
+ALLOWED_HOSTS = [os.getenv("ALLOWED_HOSTS")]
 
 # Application definition
 
@@ -121,7 +116,7 @@ BASE_DIREC = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 import dj_database_url
 
 DATABASES = {"default": dj_database_url.config(default=os.getenv("DATABASE_URL"))}
-#yamabiko.proxy.rlwy.net:21936 #Railway.app postgres instance. test whenever
+# yamabiko.proxy.rlwy.net:21936 #Railway.app postgres instance. test whenever
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
