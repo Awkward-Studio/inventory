@@ -56,18 +56,19 @@ jobs:
       - run:
           name: Clone or update code on EC2
           command: |
-            ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST "\
-              set -e; \
-              if ! command -v git >/dev/null; then sudo yum install -y git; fi; \
-              if [ ! -d ~/app/.git ]; then \
-                rm -rf ~/app; \
-                git clone --depth 1 --branch $CIRCLE_BRANCH \
-                  https://github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git ~/app; \
-              else \
-                cd ~/app; \
-                git fetch   origin $CIRCLE_BRANCH; \
-                git reset --hard origin/$CIRCLE_BRANCH; \
-              fi\
+            ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} "
+              set -e;
+              # install git if needed
+              sudo yum install -y git || true;
+              # if repo exists, fetch & reset
+              if [ -d ~/app/.git ]; then
+                cd ~/app && \
+                git fetch --depth=1 origin ${CIRCLE_BRANCH} && \
+                git reset --hard origin/${CIRCLE_BRANCH};
+              else
+                rm -rf ~/app && \
+                git clone --depth 1 --branch ${CIRCLE_BRANCH} ${CIRCLE_REPOSITORY_URL} ~/app;
+              fi
             "
 
       # 7. Upload the .env to the right place
