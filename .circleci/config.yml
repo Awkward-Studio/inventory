@@ -61,10 +61,11 @@ jobs:
               if ! command -v git >/dev/null; then sudo yum install -y git; fi; \
               if [ ! -d ~/app/.git ]; then \
                 rm -rf ~/app; \
-                git clone \"$CIRCLE_REPOSITORY_URL\" ~/app; \
+                git clone --depth 1 --branch $CIRCLE_BRANCH \
+                  https://github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git ~/app; \
               else \
                 cd ~/app; \
-                git fetch origin; \
+                git fetch   origin $CIRCLE_BRANCH; \
                 git reset --hard origin/$CIRCLE_BRANCH; \
               fi\
             "
