@@ -52,24 +52,11 @@ jobs:
                 $EC2_USER@$EC2_HOST \
               "mkdir -p ~/app"
 
-      # 6. Clone or update your repo on EC2
       - run:
-          name: Clone or update code on EC2
+          name: Upload app to EC2
           command: |
-            ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} "
-              set -e;
-              # install git if needed
-              sudo yum install -y git || true;
-              # if repo exists, fetch & reset
-              if [ -d ~/app/.git ]; then
-                cd ~/app && \
-                git fetch --depth=1 origin ${CIRCLE_BRANCH} && \
-                git reset --hard origin/${CIRCLE_BRANCH};
-              else
-                rm -rf ~/app && \
-                git clone --depth 1 --branch ${CIRCLE_BRANCH} ${CIRCLE_REPOSITORY_URL} ~/app;
-              fi
-            "
+            ssh -o StrictHostKeyChecking=no "$EC2_USER@$EC2_HOST" "mkdir -p ~/app"
+            scp -r -o StrictHostKeyChecking=no . "$EC2_USER@$EC2_HOST:~/app"
 
       # 7. Upload the .env to the right place
       - run:
