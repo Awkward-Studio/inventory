@@ -44,14 +44,14 @@ jobs:
       - run:
           name: Upload .env to EC2
           command: |
-            scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no .env \
+            scp -i ~/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no .env \
               $EC2_USER@$EC2_HOST:~/app/.env
 
       # 6. SSH & deploy—single quoted command, no heredoc
       - run:
           name: Bootstrap & Deploy on EC2
           command: |
-            ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST "\
+            ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST "\
               sudo yum update -y && \
               sudo amazon-linux-extras install docker -y && \
               sudo yum install -y docker-compose-plugin && \
