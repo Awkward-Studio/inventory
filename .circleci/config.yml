@@ -35,16 +35,16 @@ jobs:
             echo "DJANGO_DEBUG=${DJANGO_DEBUG:-False}"                   >> .env
             echo "DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}"          >> .env
             echo "DATABASE_URL=${DATABASE_URL}"                          >> .env
-            echo "DJANGO_SUPERUSER_USERNAME=${DJANGO_SUPERUSER_USERNAME}" >> .env
+            echo "DJANGO_SUPERUSER_USERNAME=${DJANGO_SUPERUSER_USERNAME}">> .env
             echo "DJANGO_SUPERUSER_EMAIL=${DJANGO_SUPERUSER_EMAIL}"      >> .env
-            echo "DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}" >> .env
+            echo "DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}">> .env
             echo "NUM_WORKERS=${NUM_WORKERS:-1}"                         >> .env
 
       # 5. Upload .env to the EC2
       - run:
           name: Upload .env to EC2
           command: |
-            scp -o StrictHostKeyChecking=no .env \
+            scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no .env \
               $EC2_USER@$EC2_HOST:~/app/.env
 
       # 6. SSH & deploy—single quoted command, no heredoc
