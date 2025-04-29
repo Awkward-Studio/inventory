@@ -40,6 +40,13 @@ jobs:
             echo "DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}">> .env
             echo "NUM_WORKERS=${NUM_WORKERS:-1}"                         >> .env
 
+      - run:
+          name: Ensure ~/app exists on EC2
+          command: |
+            ssh -o StrictHostKeyChecking=no \
+                $EC2_USER@$EC2_HOST \
+              "mkdir -p ~/app"
+
       # 5. Upload .env to the EC2
       - run:
           name: Upload .env to EC2
