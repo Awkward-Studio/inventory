@@ -13,7 +13,7 @@ jobs:
           aws-secret-access-key: AWS_SECRET_ACCESS_KEY
           default-region: AWS_REGION
 
-      # 2. Look up the current EC2 public IP
+      # 2. Fetch the current public IP for our instance
       - run:
           name: Get EC2 public IP
           command: |
@@ -21,15 +21,14 @@ jobs:
               --instance-ids $EC2_INSTANCE_ID \
               --query 'Reservations[0].Instances[0].PublicIpAddress' \
               --output text)
-            echo "Fetched EC2_HOST=$IP"
             echo "export EC2_HOST=$IP" >> $BASH_ENV
 
-      # 3. Load your deploy SSH key
+      # 3. Load our SSH key into the agent
       - add_ssh_keys:
           fingerprints:
             - "SHA256:u6+po0YEbQhrHo1j40ptyNmFrngk8M0GFGncnU5vyCE"
 
-      # 4. Generate .env from secure CircleCI vars
+      # 4. Generate the .env file from secure CircleCI vars
       - run:
           name: Generate .env file
           command: |
@@ -42,34 +41,27 @@ jobs:
             echo "DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}">> .env
             echo "NUM_WORKERS=${NUM_WORKERS:-1}"                         >> .env
 
-      # 5. Copy .env onto your EC2
+      # 5. Upload .env to the EC2
       - run:
           name: Upload .env to EC2
           command: |
             scp -o StrictHostKeyChecking=no .env \
               $EC2_USER@$EC2_HOST:~/app/.env
 
-      # 6. SSH in and deploy (heredoc opener escaped)
+      # 6. SSH & deploy—single quoted command, no heredoc
       - run:
           name: Bootstrap & Deploy on EC2
           command: |
-            ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST \<< 'EOF'
-              set -e
-
-              # Install Docker & Compose plugin if missing
-              if ! command -v docker >/dev/null; then
-                sudo yum update -y
-                sudo amazon-linux-extras install docker -y
-                sudo yum install -y docker-compose-plugin
-                sudo service docker start
-              fi
-
-              # Pull your latest code and rebuild
-              cd ~/app
-              git fetch origin
-              git reset --hard origin/main
-              sudo docker compose up -d --build --remove-orphans
-            EOF
+            ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST "\
+              sudo yum update -y && \
+              sudo amazon-linux-extras install docker -y && \
+              sudo yum install -y docker-compose-plugin && \
+              sudo service docker start && \
+              cd ~/app && \
+              git fetch origin && \
+              git reset --hard origin/main && \
+              sudo docker compose up -d --build --remove-orphans\
+            "
 
 workflows:
   deploy_on_push:
