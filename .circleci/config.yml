@@ -33,16 +33,14 @@ jobs:
       - run:
           name: Generate .env file
           command: |
-            cat <<EOF > .env
-            DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
-            DJANGO_DEBUG=${DJANGO_DEBUG:-False}
-            DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}
-            DATABASE_URL=${DATABASE_URL}
-            DJANGO_SUPERUSER_USERNAME=${DJANGO_SUPERUSER_USERNAME}
-            DJANGO_SUPERUSER_EMAIL=${DJANGO_SUPERUSER_EMAIL}
-            DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}
-            NUM_WORKERS=${NUM_WORKERS:-3}
-            EOF
+            echo "DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}" > .env
+            echo "DJANGO_DEBUG=${DJANGO_DEBUG:-False}"         >> .env
+            echo "DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}">> .env
+            echo "DATABASE_URL=${DATABASE_URL}">> .env
+            echo "DJANGO_SUPERUSER_USERNAME=${DJANGO_SUPERUSER_USERNAME}" >> .env
+            echo "DJANGO_SUPERUSER_EMAIL=${DJANGO_SUPERUSER_EMAIL}"       >> .env
+            echo "DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}" >> .env
+            echo "NUM_WORKERS=${NUM_WORKERS:-1}"               >> .env
 
       # 5. SSH & deploy
       - run:
